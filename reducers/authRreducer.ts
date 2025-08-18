@@ -8,6 +8,7 @@ export type AuthAction =
  | {type: "LOGIN_REQUEST"}
  | {type: "LOGIN_SUCCESS", payload: {id: string, email: string, name: string}}
  | {type: "LOGIN_FAILURE", payload: string}
+ | {type: "LOGOUT"}
 
 export const InitialAuthState : AuthState = {
     user: null,
@@ -35,5 +36,8 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
                 isLoading: false,
                 error: action.payload
             }
+        case "LOGOUT":
+            return InitialAuthState;
+            
     }
 }
