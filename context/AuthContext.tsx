@@ -1,3 +1,4 @@
+'use client'
 import { createContext, useContext, useReducer } from "react";
 import { AuthState, AuthAction, authReducer,InitialAuthState } from "@/reducers/authRreducer";
 
