@@ -1,3 +1,4 @@
+'use client'
 import ProtectedRoute from "@/components/ProtextedRoute"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext"
@@ -36,7 +37,7 @@ const DashboardLayout = ({children}: {children: React.ReactNode}) => {
             </nav>
             <div className="mt-auto">
               <p className="mb-2 text-sm">Logged in as {state.user?.email}</p>
-              <Button onClick={logout} className="w-full">
+              <Button onClick={logout} className="w-full cursor-pointer">
                 Logout
               </Button>
             </div>

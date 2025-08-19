@@ -16,6 +16,7 @@ export default function LoginPage() {
   const { register, handleSubmit } = useForm<FormData>();
 
   async function onSubmit(data: FormData) {
+    console.log("Logging in user:", data);
     await login(data.email, data.password);
   }
 

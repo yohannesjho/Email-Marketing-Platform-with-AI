@@ -5,6 +5,7 @@ import { hashPassword, generateToken } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
+    console.log(name, email, password)
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });

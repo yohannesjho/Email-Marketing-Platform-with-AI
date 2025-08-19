@@ -13,10 +13,11 @@ type FormData = {
 };
 
 export default function RegisterPage() {
-  const { register: registerUser, state } = useAuth();
+  const { registerUser, state } = useAuth();
   const { register, handleSubmit } = useForm<FormData>();
 
   async function onSubmit(data: FormData) {
+    console.log("Registering user:", data);
     await registerUser(data.name, data.email, data.password);
   }
 
