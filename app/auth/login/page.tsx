@@ -38,7 +38,7 @@ export default function LoginPage() {
               type="password"
               {...register("password", { required: true })}
             />
-            <Button type="submit" className="w-full" disabled={state.isLoading}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={state.isLoading}>
               {state.isLoading ? "Logging in..." : "Login"}
             </Button>
             {state.error && (

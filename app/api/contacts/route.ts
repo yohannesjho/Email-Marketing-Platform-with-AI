@@ -30,17 +30,15 @@ export async function POST(req: Request) {
 
    const { name, email, tags } = await req.json();
 
-   const tagData = tags?.map((tagName: string) => ({
-     where: { value: tagName },
-     create: { value: tagName },
-   }));
+   
+   
 
    const contact = await prisma.contact.create({
      data: {
        name,
        email,
        userId: user.id,
-       tags: { connectOrCreate: tagData },
+       tags
      },
    });
     return NextResponse.json(contact);

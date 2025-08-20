@@ -30,7 +30,7 @@ model Contact {
   id        String    @id @default(cuid())
   name      String
   email     String
-  tags      Tag[]     // Many-to-many
+  tags      String[]      
   createdAt DateTime  @default(now())
 
   user      User      @relation(fields: [userId], references: [id])
@@ -39,11 +39,6 @@ model Contact {
   emails    Email[]
 }
 
-model Tag {
-  id       String     @id @default(cuid())
-  value    String     @unique
-  contacts Contact[]  // Many-to-many
-}
 
 model Template {
   id        String    @id @default(cuid())

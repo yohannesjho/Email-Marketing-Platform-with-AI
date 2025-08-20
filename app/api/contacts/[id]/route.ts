@@ -13,17 +13,14 @@ export async function PUT(
 
   const { name, email, tags } = await req.json();
 
-  const tagData = tags?.map((tagValue: string) => ({
-    where: { value: tagValue },
-    create: { value: tagValue },
-  }));
+ 
 
   const contact = await prisma.contact.update({
     where: { id: params.id, userId: user.id },
     data: {
       name,
       email,
-      tags: { set: [], connectOrCreate: tagData }, // replaces old tags
+      tags 
     },
   });
 
@@ -39,22 +36,28 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params; // ✅ await params
+
     const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await prisma.contact.delete({
-      where: { id: params.id, userId: user.id },
+      where: { id }, // ✅ only use `id`
     });
 
     return NextResponse.json({ message: "Contact deleted" });
   } catch (error) {
+    console.error("Delete error:", error);
     return NextResponse.json(
       { error: "Failed to delete contact" },
       { status: 500 }
     );
   }
 }
+
+
+

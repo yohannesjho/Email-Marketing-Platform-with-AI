@@ -29,7 +29,7 @@ export default function ContactFormModal({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onSave: (data: any) => void;
-  contact: any | null;
+  contact: { id: string; name: string; email: string; tags: string[] } | null;
 }) {
   const {
     register,
@@ -41,7 +41,7 @@ export default function ContactFormModal({
     defaultValues: {
       name: contact?.name || "",
       email: contact?.email || "",
-      tags: contact?.tags?.map((t: any) => t.value).join(", ") || "",
+      tags: contact?.tags?.join(", ") || "",
     },
   });
 
