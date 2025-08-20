@@ -7,7 +7,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await getUserFromToken(req);
+    const user = await getUserFromToken();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -41,7 +41,7 @@ export async function DELETE(
   try {
     const { id } = await context.params; // ✅ await params
 
-    const user = await getUserFromToken(req);
+    const user = await getUserFromToken();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

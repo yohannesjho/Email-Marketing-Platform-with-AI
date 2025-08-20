@@ -29,7 +29,7 @@ export default function ContactsPage() {
       .then((data) => setContacts(data));
   }, []);
 
-  const handleSave = async (contact: Contact) => {
+  const handleSave = async (contact: any) => {
     if (selectedContact) {
       // update
       await fetch(`/api/contacts/${selectedContact.id}`, {

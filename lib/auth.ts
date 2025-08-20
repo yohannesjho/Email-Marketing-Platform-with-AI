@@ -25,7 +25,7 @@ export function verifyToken(token: string) {
   }
 }
 
-export async function getUserFromToken(req: Request) {
+export async function getUserFromToken() {
   try {
    
     const cookieStore = await cookies();
