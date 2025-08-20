@@ -41,7 +41,7 @@ model Contact {
 
 model Tag {
   id       String     @id @default(cuid())
-  value    String
+  value    String     @unique
   contacts Contact[]  // Many-to-many
 }
 

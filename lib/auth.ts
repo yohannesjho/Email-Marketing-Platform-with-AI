@@ -27,7 +27,7 @@ export function verifyToken(token: string) {
 
 export async function getUserFromToken(req: Request) {
   try {
-    // Read cookies (Next.js App Router way)
+   
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 

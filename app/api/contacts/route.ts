@@ -45,6 +45,7 @@ export async function POST(req: Request) {
    });
     return NextResponse.json(contact);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: "Failed to create contact" },
       { status: 500 }
