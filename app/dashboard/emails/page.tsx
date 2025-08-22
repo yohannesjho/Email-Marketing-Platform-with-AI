@@ -6,12 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import EmailFormModal, { CreateOrUpdateEmail } from "@/components/emails/EmailFormModal";
 import { Email } from "@/types/emails";
+import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
 
 
 
 export default function EmailsPage() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [open, setOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
 
   // Load emails
@@ -49,9 +51,9 @@ export default function EmailsPage() {
   };
 
   async function deleteEmail(id: string | undefined) {
-    const res = await fetch(`/api/emails/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/email/${id}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to delete email");
-    const updated = await fetch("/api/emails").then((res) => res.json());
+    const updated = await fetch("/api/email").then((res) => res.json());
     setEmails(updated);
   }
 
@@ -59,10 +61,12 @@ export default function EmailsPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Emails</h1>
-        <Button onClick={() => {
-          setSelectedEmail(null);
-          setOpen(true);
-        }}>
+        <Button
+          onClick={() => {
+            setSelectedEmail(null);
+            setOpen(true);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" /> New Email
         </Button>
       </div>
@@ -85,7 +89,10 @@ export default function EmailsPage() {
               </p>
             </CardContent>
             <button
-              onClick={() => deleteEmail(e.id)}
+              onClick={() => {
+                setSelectedEmail(e);
+                setDeleteOpen(true);
+              }}
               className="text-red-500 hover:underline cursor-pointer px-4 py-2"
             >
               Delete
@@ -103,6 +110,17 @@ export default function EmailsPage() {
         onSave={handleSave}
         email={selectedEmail}
       />
+
+      <DeleteEmailModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={async () => {
+          if (selectedEmail) {
+            deleteEmail(selectedEmail.id);
+          }
+        }}
+      />
+      
     </div>
   );
 }
