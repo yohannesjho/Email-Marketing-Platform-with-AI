@@ -33,7 +33,7 @@ export default function EmailsPage() {
       });
     } else {
       // create
-      await fetch("/api/emails", {
+      await fetch("/api/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(email),

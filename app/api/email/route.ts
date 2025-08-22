@@ -29,7 +29,14 @@ export async function POST(req: Request) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
 
-        const { subject, body: emailBody, scheduledAt, templateId, recipientIds, status } = await req.json();
+        const {
+          subject,
+          body: emailBody,
+          scheduledAt,
+          templateId,
+          recipients,
+          status,
+        } = await req.json();
 
         
 
@@ -37,18 +44,19 @@ export async function POST(req: Request) {
             return NextResponse.json({message: "subject and body are required"}, { status: 400})
 
         const email = await prisma.email.create({
-            data: {
-                subject,
-                body: emailBody,
-                scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-                templateId,
-                status: status,
-                userId: user.id,
-                recipients: {
-                    connect: recipientIds.map((id: string) => ({ id}))
-                }
-            }
-        })
+          data: {
+            subject,
+            body: emailBody,
+            scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+            templateId,
+            status: status,
+            userId: user.id,
+            recipients:
+              recipients && recipients.length > 0
+                ? { connect: recipients.map((rid: string) => ({ id: rid })) }
+                : undefined,
+          },
+        });
 
         return NextResponse.json(email)
     } catch (error) {
