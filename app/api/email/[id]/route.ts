@@ -36,41 +36,50 @@ export async function GET(
   }
 }
 
-export async function PUT(req: Request, {params}: { params: {id: string}}) {
-     try {
-         const user = await getUserFromToken()
+export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params;
+    const user = await getUserFromToken();
 
-         if(!user) {
-            return NextResponse.json({error: "Unauthorized"}, { status: 401})
-         }
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+ 
+    
+    const {
+      subject,
+      body: emailBody,
+      templateId,
+      recipients,
+      scheduledAt,
+      status,
+    } = await req.json();
 
-        const {
-          subject,
-          body: emailBody,
-          templateId,
-          recipientIds,
-          scheduledAt,
-          status,
-        } = await req.json()
-
-        const email = prisma.email.update({
-            where: {id: params.id, userId: user.id},
-            data: {
-                subject,
-                body: emailBody,
-                templateId,
-                scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-                status,
-                recipients: {
-                    connect: recipientIds.map((id: string) => ({ id }))
-                }
-            }
-        })
-
-        return NextResponse.json(email)
-     } catch(error) {
-         return NextResponse.json({message: "error updating email"}, { status: 500})
-     }
+    console.log(recipients)
+     
+    const email = await prisma.email.update({
+      where: { id, userId: user.id },
+      data: {
+        subject,
+        body: emailBody,
+        templateId,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+        status,
+        recipients:
+          recipients && recipients.length > 0
+            ? { set: recipients.map((rid: string) => ({ id: rid })) }
+            : undefined,
+      },
+    });
+   
+    return NextResponse.json(email);
+  } catch (error) {
+    console.log(error)
+    return NextResponse.json(
+      { message: "error updating email" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(

@@ -10,6 +10,9 @@ export async function GET(){
         const emails = await prisma.email.findMany({
           where: { userId : user.id },
           orderBy: { createdAt: "desc" },
+          include: {
+            recipients: true
+          }
         });
 
         return NextResponse.json(emails);
@@ -28,6 +31,8 @@ export async function POST(req: Request) {
 
         const { subject, body: emailBody, scheduledAt, templateId, recipientIds, status } = await req.json();
 
+        
+
         if(!subject || !emailBody) 
             return NextResponse.json({message: "subject and body are required"}, { status: 400})
 
@@ -44,7 +49,10 @@ export async function POST(req: Request) {
                 }
             }
         })
+
+        return NextResponse.json(email)
     } catch (error) {
+        console.log(error)
         return NextResponse.json({message: "Failed to create email"}, { status: 500} )
     }
 }
