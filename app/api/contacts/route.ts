@@ -1,15 +1,24 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {prisma} from "@/lib/prisma";
 import { getUserFromToken } from "@/lib/auth";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const user = await getUserFromToken();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const { searchParams } = new URL(req.url);
+
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "5");
+
+    const skip = (page - 1) * limit;
+
     const contacts = await prisma.contact.findMany({
       where: { userId: user.id },
+      skip,
+      take: limit,
       orderBy: { createdAt: "desc" },
     });
 
