@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
 import DeleteContactModal from "@/components/contacts/DeleteContactModal";
+import Pagination from "@/components/Pagination";
 
 type Contact = {
   id: string;
@@ -16,6 +17,9 @@ type Contact = {
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
@@ -24,9 +28,12 @@ export default function ContactsPage() {
 
   // Load contacts
   useEffect(() => {
-    fetch("/api/contacts")
+    fetch(`/api/contacts?page=${page}&limit=${limit}`)
       .then((res) => res.json())
-      .then((data) => setContacts(data));
+      .then((data) => {
+        setTotalCount(data.totalCount)
+        setContacts(data.contacts)
+      });
   }, []);
 
   const handleSave = async (contact: any) => {
@@ -128,6 +135,14 @@ export default function ContactsPage() {
             setDeleteOpen(false);
           }
         }}
+      />
+
+      <Pagination
+        currentPage={page}
+        onPageChange={setPage}
+        totalCount={totalCount}
+        pageSize={limit}
+        onPageSizeChange={setLimit}
       />
     </div>
   );

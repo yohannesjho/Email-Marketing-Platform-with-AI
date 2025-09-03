@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(contacts);
+    const totalCount = await prisma.contact.count({
+      where:{userId: user.id}
+    })
+
+    return NextResponse.json({contacts, totalCount}, {status:200});
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch contacts" },
