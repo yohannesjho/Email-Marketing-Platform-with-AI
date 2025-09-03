@@ -1,9 +1,9 @@
 import { getUserFromToken } from '@/lib/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const user = await getUserFromToken();
 
@@ -11,16 +11,24 @@ export async function GET() {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
 
+        const { searchParams } = new URL(req.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '5')
+
+        const skip = (page - 1) * limit;
+        
         const templates = await prisma.template.findMany({
             where: {userId: user.id},
             orderBy: { createdAt: 'desc'},
-            include: {
-                emails: true
-            }
+            skip,
+            take: limit,
         })
-        
 
-        return NextResponse.json(templates)
+        const totalCount = await prisma.template.count({
+            where: {userId: user.id}
+        })
+
+        return NextResponse.json({ templates, totalCount }, { status: 200 })
     } catch (error) {
         return NextResponse.json({message: "Internal Server Error"}, { status: 500})
     }

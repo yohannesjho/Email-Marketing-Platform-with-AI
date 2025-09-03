@@ -4,14 +4,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-function cleanTemplateBody(body: string): string {
-  return body
-    .replace(/\*\*/g, "") // remove bold markdown
-    .replace(/\\n/g, "\n") // convert literal \n to real line breaks
-    .replace(/^\s*[\*\-]\s*/gm, "") // remove bullet points (* or -) at line start
-    .replace(/\s+$/gm, ""); // trim trailing spaces per line
-}
-
+ 
 export async function generateTemplate(prompt: string) {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -45,11 +38,11 @@ export async function generateTemplate(prompt: string) {
       subject: string;
       body: string;
     };
-    // Clean the body before returning
-    json.body = cleanTemplateBody(json.body);
+    
+
     return json;
   } catch (err) {
     console.error("Failed to parse JSON:", jsonMatch[0], err);
-    throw err;
+    throw err; 
   }
 }

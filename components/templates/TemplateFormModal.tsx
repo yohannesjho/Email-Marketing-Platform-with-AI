@@ -81,7 +81,7 @@ export default function TemplateFormModal({
         </DialogHeader>
 
         {/* Body (scrollable) */}
-        <div className="flex-1 overflow-y-auto px-1">
+        <div className="flex-1 overflow-y-auto px-1 pr-2">
           <form
             id="template-form"
             onSubmit={handleSubmit(submit)}
@@ -107,7 +107,7 @@ export default function TemplateFormModal({
               <Label>Body</Label>
               <Textarea
                 placeholder="Email body"
-                className="min-h-[200px] max-h-[300px] resize-y"
+                className="min-h-[200px] resize-y"
                 {...register("body")}
               />
               {errors.body && (
@@ -119,7 +119,11 @@ export default function TemplateFormModal({
 
         {/* Footer */}
         <div className="flex justify-end gap-2 mt-4 shrink-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="cursor-pointer"
+          >
             Cancel
           </Button>
           <Button type="submit" form="template-form" className="cursor-pointer">

@@ -10,13 +10,15 @@ import TemplateFormModal, {
 } from "@/components/templates/TemplateFormModal";
 import DeleteTemplateModal from "@/components/templates/DeleteTemplateModal";
 import GenerateFormModal from "@/components/templates/GenerateFormModal";
-import { set } from "zod";
+ 
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
-
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
@@ -30,7 +32,10 @@ export default function TemplatesPage() {
   useEffect(() => {
     fetch("/api/templates")
       .then((res) => res.json())
-      .then((data) => setTemplates(data));
+      .then((data) => {
+        setTemplates(data.templates);
+        setTotalCount(data.totalCount);
+      });
   }, []);
 
   const handleSave = async (template: CreateOrUpdateTemplate) => {
@@ -133,15 +138,20 @@ export default function TemplatesPage() {
               <h2 className="font-semibold">{t.subject}</h2>
               <p className="text-sm text-gray-600 line-clamp-2">{t.body}</p>
             </CardContent>
-            <button
-              onClick={() => {
-                setSelectedTemplate(t);
-                setDeleteOpen(true);
-              }}
-              className="text-red-500 hover:underline cursor-pointer px-4 py-2"
-            >
-              Delete
-            </button>
+
+            {/* Centered Delete button */}
+            <div className="flex justify-center pb-4">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setSelectedTemplate(t);
+                  setDeleteOpen(true);
+                }}
+                className="cursor-pointer"
+              >
+                Delete
+              </Button>
+            </div>
           </Card>
         ))}
       </div>
