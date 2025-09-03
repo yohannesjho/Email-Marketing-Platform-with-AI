@@ -17,7 +17,7 @@ export async function generateTemplate(prompt: string) {
     model: "gemini-2.5-flash",
     contents: `
       ONLY return raw JSON. Do NOT include explanations, code fences, or extra text.
-      Generate an email template in strict JSON format with the following fields:
+      Generate an email template in strict JSON format with the following fields and for the name field in the json give an appropriate name based on prompt:
       {
         "name": string,    
         "subject": string,

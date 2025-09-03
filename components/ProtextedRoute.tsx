@@ -1,26 +1,41 @@
- 'use client'
+"use client";
 
-import { useAuth } from "@/context/AuthContext"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const ProtectedRoute = ({children}: {children: React.ReactNode}) => {
-     const { state } = useAuth()
-     const router = useRouter()
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { state, dispatch } = useAuth();
+  const router = useRouter();
+  const [initialized, setInitialized] = useState(false); // track localStorage check
 
-     useEffect(() => {
-         if (!state.user && !state.isLoading) {
-             router.push("/auth/login")
-         }
-     }, [state.user, state.isLoading, router])
+  // Load user from localStorage once on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      const user = JSON.parse(stored);
+      dispatch({ type: "LOGIN_SUCCESS", payload: user });
+    }
+    setInitialized(true); // finished checking
+  }, [dispatch]);
 
+  // Redirect only after initialization
+  useEffect(() => {
+    if (initialized && !state.user && !state.isLoading) {
+      router.push("/auth/login");
+    }
+  }, [initialized, state.user, state.isLoading, router]);
 
-     if(!state.user) {
-        return <p className="text-center mt-20">Redirecting...</p>
-     }
-  return (
-    <div>{children}</div>
-  )
-}
+  if (!initialized || !state.user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="w-10 h-10 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
-export default ProtectedRoute
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;

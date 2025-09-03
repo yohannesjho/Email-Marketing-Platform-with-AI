@@ -1,6 +1,6 @@
 'use client'
 import { createContext, useContext, useReducer } from "react";
-import { AuthState, AuthAction, authReducer,InitialAuthState } from "@/reducers/authRreducer";
+import { AuthState, AuthAction, authReducer,InitialAuthState, init } from "@/reducers/authRreducer";
 import { useRouter } from 'next/navigation';
 
 type AuthContextType = {
@@ -37,7 +37,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error("Login failed");
       }
       const user = await res.json();
+      
       dispatch({ type: "LOGIN_SUCCESS", payload: user });
+
+      localStorage.setItem('user', JSON.stringify(user));
       router.push("/dashboard");
     } catch (error) {
       dispatch({ type: "LOGIN_FAILURE", payload: "Login failed" });
@@ -68,23 +71,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Logout failed");
-      }
-      dispatch({ type: "LOGOUT" });
-    } catch(error) {
-       dispatch({ type: "LOGIN_FAILURE", payload: "Registration failed" });
-      
+const logout = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/api/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Logout failed");
     }
-  };
+
+    // Clear persisted user
+    localStorage.removeItem("user");  
+    dispatch({ type: "LOGOUT" });
+  } catch (error) {
+    console.error(error);
+    dispatch({ type: "LOGIN_FAILURE", payload: "Logout failed" });
+  }
+};
+
 
   return (
     <AuthContext.Provider

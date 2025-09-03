@@ -41,3 +41,12 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
             
     }
 }
+
+export const init = () => {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : InitialAuthState;
+  }
+  return InitialAuthState;
+}
+

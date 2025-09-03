@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext"
 import Link from "next/link";
 
 const DashboardLayout = ({children}: {children: React.ReactNode}) => {
-    const { state, logout} = useAuth()
+    const { state, logout } = useAuth()
 
     return (
       <ProtectedRoute>

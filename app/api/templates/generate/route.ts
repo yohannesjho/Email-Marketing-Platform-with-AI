@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateTemplate } from "@/lib/gemini";
+import { prisma } from "@/lib/prisma";
+import { getUserFromToken } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -10,10 +12,26 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+   
+    const user = await getUserFromToken()
 
-    const template = await generateTemplate(prompt);
+    if(!user) {
+      return NextResponse.json({message: "Unautorized"}, {status: 401})
+    }
+    
+    const generatedTemplate  = await generateTemplate(prompt);
 
-    return NextResponse.json(template);
+  
+    const registeredTemplate = await prisma.template.create({
+      data: {
+        name: generateTemplate.name,
+        subject: generatedTemplate.subject,
+        body: generatedTemplate.body,
+        userId: user.id
+      }
+    })
+
+    return NextResponse.json(registeredTemplate);
   } catch (error) {
     console.error("Gemini error:", error);
     return NextResponse.json(
