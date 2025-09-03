@@ -10,7 +10,7 @@ import TemplateFormModal, {
 } from "@/components/templates/TemplateFormModal";
 import DeleteTemplateModal from "@/components/templates/DeleteTemplateModal";
 import GenerateFormModal from "@/components/templates/GenerateFormModal";
- 
+import Pagination from "@/components/Pagination";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -23,20 +23,20 @@ export default function TemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
   );
- 
+
   const [loading, setLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
 
   // Load templates
   useEffect(() => {
-    fetch("/api/templates")
+    fetch(`/api/templates?limit=${limit}&page=${page}`)
       .then((res) => res.json())
       .then((data) => {
         setTemplates(data.templates);
         setTotalCount(data.totalCount);
       });
-  }, []);
+  }, [page, limit]);
 
   const handleSave = async (template: CreateOrUpdateTemplate) => {
     if (selectedTemplate) {
@@ -83,7 +83,6 @@ export default function TemplatesPage() {
       setLoading(false);
       setGenerateError(null);
       setGenerateSuccess("Template generated successfully!");
-
     } catch (error) {
       setLoading(false);
       setGenerateError("Error generating template");
@@ -183,6 +182,14 @@ export default function TemplatesPage() {
             deleteEmail(selectedTemplate.id);
           }
         }}
+      />
+
+      <Pagination
+        currentPage={page}
+        totalCount={totalCount}
+        pageSize={limit}
+        onPageChange={setPage}
+        onPageSizeChange={setLimit}
       />
     </div>
   );
