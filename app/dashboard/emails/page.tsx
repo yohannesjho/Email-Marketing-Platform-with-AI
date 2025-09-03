@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import EmailFormModal, { CreateOrUpdateEmail } from "@/components/emails/EmailFormModal";
 import { Email } from "@/types/emails";
 import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
+import Pagination from "@/components/Pagination";
 
 
 
@@ -120,7 +121,8 @@ export default function EmailsPage() {
           }
         }}
       />
-      
+
+       
     </div>
   );
 }
