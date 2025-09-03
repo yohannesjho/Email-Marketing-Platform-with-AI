@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '5')
 
+    
+
     const skip = (page -1 ) * limit;
 
     const emails = await prisma.email.findMany({
@@ -24,7 +26,11 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(emails);
+    const totalCount = await prisma.email.count({
+      where:{userId: user.id}
+    })
+
+    return NextResponse.json({emails, totalCount}, {status: 200});
   } catch (error) {
     return NextResponse.json({ message: "server error" }, { status: 500 });
   }

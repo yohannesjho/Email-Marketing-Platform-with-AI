@@ -4,30 +4,35 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import EmailFormModal, { CreateOrUpdateEmail } from "@/components/emails/EmailFormModal";
+import EmailFormModal, {
+  CreateOrUpdateEmail,
+} from "@/components/emails/EmailFormModal";
 import { Email } from "@/types/emails";
 import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
 import Pagination from "@/components/Pagination";
 
-
-
 export default function EmailsPage() {
   const [emails, setEmails] = useState<Email[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
 
   // Load emails
   useEffect(() => {
-    fetch("/api/email")
+    fetch(`/api/email?page=${page}&limit=${limit}`)
       .then((res) => res.json())
-      .then((data) => setEmails(data));
-  }, []);
+      .then((data) => {
+        setEmails(data.emails);
+        setTotalCount(data.totalCount);
+      });
+  }, [page,limit]);
 
   const handleSave = async (email: CreateOrUpdateEmail) => {
-    
     if (selectedEmail) {
-      console.log(email)
+      console.log(email);
       // update
       await fetch(`/api/email/${selectedEmail.id}`, {
         method: "PUT",
@@ -36,7 +41,7 @@ export default function EmailsPage() {
       });
     } else {
       // create
-      await fetch("/api/email", {
+      await fetch(`/api/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(email),
@@ -122,7 +127,13 @@ export default function EmailsPage() {
         }}
       />
 
-       
+      <Pagination
+        currentPage={page}
+        onPageChange={setPage}
+        totalCount={totalCount}
+        pageSize={limit}
+        onPageSizeChange={setLimit}
+      />
     </div>
   );
 }
