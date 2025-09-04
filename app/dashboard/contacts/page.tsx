@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
 import DeleteContactModal from "@/components/contacts/DeleteContactModal";
 import Pagination from "@/components/Pagination";
+import Loader from "@/components/Loader";
 
 type Contact = {
   id: string;
@@ -25,15 +26,23 @@ export default function ContactsPage() {
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
+  const [loading, setLoading] = useState(false)
 
   // Load contacts
   useEffect(() => {
+    setLoading(true)
     fetch(`/api/contacts?page=${page}&limit=${limit}`)
       .then((res) => res.json())
       .then((data) => {
-        setTotalCount(data.totalCount)
-        setContacts(data.contacts)
-      });
+        setTotalCount(data.totalCount);
+        setContacts(data.contacts);
+      })
+      .catch((err) => {
+        console.error("Error fetching contacts:", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });;
   }, []);
 
   const handleSave = async (contact: any) => {
@@ -82,39 +91,55 @@ export default function ContactsPage() {
       </div>
 
       <div className="grid gap-4">
-        {contacts.map((c) => (
-          <Card key={c.id} className="hover:shadow">
-            <CardContent
-              onClick={() => {
-                setSelectedContact(c);
-                setOpen(true);
-              }}
-              className="p-4 cursor-pointer"
-            >
-              <h2 className="font-semibold">{c.name}</h2>
-              <p className="text-sm text-gray-600">{c.email}</p>
-              <div className="flex flex-wrap gap-2 mt-2 mb-2">
-                {c.tags?.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 bg-gray-200 rounded-full text-xs"
-                  >
-                    {tag}
-                  </span>
+        {loading ? (
+          <>
+            <Loader />
+          </>
+        ) : (
+          <>
+            {contacts && contacts.length > 0 ? (
+              <>
+                {contacts.map((c) => (
+                  <Card key={c.id} className="hover:shadow">
+                    <CardContent
+                      onClick={() => {
+                        setSelectedContact(c);
+                        setOpen(true);
+                      }}
+                      className="p-4 cursor-pointer"
+                    >
+                      <h2 className="font-semibold">{c.name}</h2>
+                      <p className="text-sm text-gray-600">{c.email}</p>
+                      <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                        {c.tags?.map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-1 bg-gray-200 rounded-full text-xs"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                    <button
+                      onClick={() => {
+                        setContactToDelete(c);
+                        setDeleteOpen(true);
+                      }}
+                      className="text-red-500 hover:underline cursor-pointer px-4 pb-2 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </Card>
                 ))}
+              </>
+            ) : (
+              <div className="flex justify-center items-center h-screen">
+                <p>No Contacts Are Found</p>
               </div>
-            </CardContent>
-            <button
-              onClick={() => {
-                setContactToDelete(c);
-                setDeleteOpen(true);
-              }}
-              className="text-red-500 hover:underline cursor-pointer px-4 pb-2 text-sm"
-            >
-              Delete
-            </button>
-          </Card>
-        ))}
+            )}
+          </>
+        )}
       </div>
 
       <ContactFormModal
