@@ -6,8 +6,11 @@ import {
 } from "@/components/ui/dialog";
 import React, { useState } from "react";
 import { Button } from "../ui/button";
+import Loader from "../Loader";
 
 type GenerateFormModalProps = {
+  prompt: string;
+  onPromptChange: (p: string) => void
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (p: string) => void;
@@ -17,6 +20,8 @@ type GenerateFormModalProps = {
 };
 
 const GenerateFormModal: React.FC<GenerateFormModalProps> = ({
+  prompt,
+  onPromptChange,
   open,
   onOpenChange,
   loading,
@@ -24,7 +29,7 @@ const GenerateFormModal: React.FC<GenerateFormModalProps> = ({
   generateSuccess,
   onSave,
 }) => {
-  const [prompt, setPrompt] = useState("");
+ 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -34,12 +39,12 @@ const GenerateFormModal: React.FC<GenerateFormModalProps> = ({
       <DialogContent>
         <textarea
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          onChange={(e) => onPromptChange(e.target.value)}
           className="w-full h-40 my-2 p-2 border rounded"
           placeholder="Enter prompt for template generation..."
         ></textarea>
         <Button onClick={() => onSave(prompt)} className="mt-4 cursor-pointer">
-          {loading ? "Generating..." : "Generate"}
+          {loading ? <Loader/> : "Generate"}
         </Button>
         {generateError && <p className="text-red-500">{generateError}</p>}
         {generateSuccess && <p className="text-green-500">{generateSuccess}</p>}

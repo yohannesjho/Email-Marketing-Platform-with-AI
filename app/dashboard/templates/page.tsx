@@ -29,6 +29,8 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState("");
+  const [updating, setUpdating] = useState(false);
 
   // Load templates
   useEffect(() => {
@@ -50,25 +52,35 @@ export default function TemplatesPage() {
 
   const handleSave = async (template: CreateOrUpdateTemplate) => {
     if (selectedTemplate) {
+      setUpdating(true);
       console.log(template);
       // update
-      await fetch(`/api/templates/${selectedTemplate.id}`, {
+      fetch(`/api/templates/${selectedTemplate.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(template),
-      });
+      })
+        .catch((err) => console.log(err))
+        .finally(() => {
+          setUpdating(false);
+        });
     } else {
       // create
-      await fetch("/api/templates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(template),
-      });
+      setUpdating(true)
+        fetch("/api/templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(template),
+        })
+          .catch((err) => console.log(err))
+          .finally(() => {
+            setUpdating(false);
+          });;
     }
 
     // Refresh list
     const updated = await fetch("/api/templates").then((res) => res.json());
-    setTemplates(updated);
+    setTemplates(updated.templates);
     setSelectedTemplate(null);
     setOpen(false);
   };
@@ -89,7 +101,7 @@ export default function TemplatesPage() {
       }
 
       const updated = await fetch("/api/templates").then((res) => res.json());
-      setTemplates(updated);
+      setTemplates(updated.templates);
       setLoading(false);
       setGenerateError(null);
       setGenerateSuccess("Template generated successfully!");
@@ -104,7 +116,7 @@ export default function TemplatesPage() {
     if (!res.ok) throw new Error("Failed to delete email");
     setDeleteOpen(false);
     const updated = await fetch("/api/templates").then((res) => res.json());
-    setTemplates(updated);
+    setTemplates(updated.templates);
   }
 
   return (
@@ -176,7 +188,7 @@ export default function TemplatesPage() {
               </>
             ) : (
               <div className="flex justify-center items-center h-screen">
-              <p>No Templates Are Found</p>
+                <p>No Templates Are Found</p>
               </div>
             )}
           </>
@@ -184,6 +196,8 @@ export default function TemplatesPage() {
       </div>
 
       <TemplateFormModal
+        updating={updating}
+        onUpdateChange={setUpdating}
         open={open}
         onOpenChange={(o) => {
           setOpen(o);
@@ -194,8 +208,17 @@ export default function TemplatesPage() {
       />
 
       <GenerateFormModal
+        prompt={prompt}
+        onPromptChange={setPrompt}
         open={generateOpen}
-        onOpenChange={setGenerateOpen}
+        onOpenChange={(p) => {
+          setGenerateOpen(p);
+          if (!p) {
+            setPrompt("");
+            setGenerateError("");
+            setGenerateSuccess("");
+          }
+        }}
         loading={loading}
         generateError={generateError}
         generateSuccess={generateSuccess}

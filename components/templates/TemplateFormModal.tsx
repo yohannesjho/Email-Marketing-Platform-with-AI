@@ -25,11 +25,15 @@ const TemplateSchema = z.object({
 export type CreateOrUpdateTemplate = zodInfer<typeof TemplateSchema>;
 
 export default function TemplateFormModal({
+  updating,
+  onUpdateChange,
   open,
   onOpenChange,
   onSave,
   template,
 }: {
+  updating: boolean;
+  onUpdateChange: (u:boolean) => void;
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onSave: (template: CreateOrUpdateTemplate) => Promise<void>;
@@ -127,7 +131,7 @@ export default function TemplateFormModal({
             Cancel
           </Button>
           <Button type="submit" form="template-form" className="cursor-pointer">
-            Save
+            {template ? updating ? "updating":"update" : updating ? "creating": "create"}
           </Button>
         </div>
       </DialogContent>

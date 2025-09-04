@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name required"),
@@ -39,11 +40,29 @@ export default function ContactFormModal({
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
-      name: contact?.name || "",
-      email: contact?.email || "",
-      tags: contact?.tags?.join(", ") || "",
+      name: "",
+      email: "",
+      tags: "",
     },
   });
+
+  useEffect(() => {
+    if (open) {
+      reset(
+        contact
+          ? {
+              name: contact.name,
+              email: contact.email,
+              tags: contact.tags?.join(", "),
+            }
+          : {
+              name: "",
+              email: "",
+              tags: "",
+            }
+      );
+    }
+  }, [contact, open, reset]);
 
   const submit = (data: ContactFormData) => {
     const payload = {

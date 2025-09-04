@@ -144,7 +144,11 @@ export default function ContactsPage() {
 
       <ContactFormModal
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(o)=> {
+          if (!o) setSelectedContact(null);
+          setOpen(o)
+         
+        }}
         onSave={handleSave}
         contact={selectedContact}
       />

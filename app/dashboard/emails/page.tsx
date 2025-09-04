@@ -11,6 +11,7 @@ import { Email } from "@/types/emails";
 import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
 import Pagination from "@/components/Pagination";
 import Loader from "@/components/Loader";
+import SendEmailModal from "@/components/emails/SendEmailModal";
  
  
 
@@ -21,6 +22,7 @@ export default function EmailsPage() {
   const [limit, setLimit] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [openSendModal, setOpenSendModal] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,6 +86,29 @@ export default function EmailsPage() {
     setEmails(updated);
   }
 
+  const handleEmailSend = async (emails: string[]) => {
+    try {
+      const res = await fetch("/api/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipients: emails,
+          subject: selectedEmail?.subject,
+          body: selectedEmail?.body,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send emails");
+
+      const data = await res.json();
+      alert("Emails sent successfully!");
+      console.log("Emails sent:", data);
+    } catch (err) {
+      console.error(err);
+    }
+
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -109,14 +134,20 @@ export default function EmailsPage() {
               <>
                 {emails?.map((e) => (
                   <Card key={e.id} className="hover:shadow">
-                    <CardContent
-                      onClick={() => {
-                        setSelectedEmail(e);
-                        setOpen(true);
-                      }}
-                      className="p-4 cursor-pointer"
-                    >
-                      <h2 className="font-semibold">{e.subject}</h2>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between mb-2">
+                        <h2 className="font-semibold">{e.subject}</h2>
+                        <Button
+                          onClick={() => {
+                            setOpenSendModal(true);
+                            setSelectedEmail(e);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          Send this email
+                        </Button>
+                      </div>
+
                       <p className="text-sm text-gray-600 line-clamp-2">
                         {e.body}
                       </p>
@@ -127,15 +158,26 @@ export default function EmailsPage() {
                           : "—"}
                       </p>
                     </CardContent>
-                    <button
-                      onClick={() => {
-                        setSelectedEmail(e);
-                        setDeleteOpen(true);
-                      }}
-                      className="text-red-500 hover:underline cursor-pointer px-4 py-2"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        onClick={() => {
+                          setSelectedEmail(e);
+                          setOpen(true);
+                        }}
+                        className="text-yellow-500 cursor-pointer"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedEmail(e);
+                          setDeleteOpen(true);
+                        }}
+                        className="text-red-500 cursor-pointer"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </Card>
                 ))}
               </>
@@ -158,6 +200,12 @@ export default function EmailsPage() {
         }}
         onSave={handleSave}
         email={selectedEmail}
+      />
+
+      <SendEmailModal
+        open={openSendModal}
+        onOpenChange={setOpenSendModal}
+        onSend={handleEmailSend}
       />
 
       <DeleteEmailModal
