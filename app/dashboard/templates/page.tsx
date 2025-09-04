@@ -11,6 +11,7 @@ import TemplateFormModal, {
 import DeleteTemplateModal from "@/components/templates/DeleteTemplateModal";
 import GenerateFormModal from "@/components/templates/GenerateFormModal";
 import Pagination from "@/components/Pagination";
+import Loader from "@/components/Loader";
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -23,6 +24,7 @@ export default function TemplatesPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
   );
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
@@ -30,11 +32,19 @@ export default function TemplatesPage() {
 
   // Load templates
   useEffect(() => {
+    setLoadingTemplates(true);
+
     fetch(`/api/templates?limit=${limit}&page=${page}`)
       .then((res) => res.json())
       .then((data) => {
         setTemplates(data.templates);
         setTotalCount(data.totalCount);
+      })
+      .catch((err) => {
+        console.error("Error fetching templates:", err);
+      })
+      .finally(() => {
+        setLoadingTemplates(false);
       });
   }, [page, limit]);
 
@@ -123,37 +133,54 @@ export default function TemplatesPage() {
         </div>
       </div>
 
-      
       <div className="grid gap-4">
-        {templates.map((t) => (
-          <Card key={t.id} className="hover:shadow">
-            <CardContent
-              onClick={() => {
-                setSelectedTemplate(t);
-                setOpen(true);
-              }}
-              className="p-4 cursor-pointer"
-            >
-              <h2 className="font-semibold">{t.name}</h2>
-              <h2 className="font-semibold">{t.subject}</h2>
-              <p className="text-sm text-gray-600 line-clamp-2">{t.body}</p>
-            </CardContent>
+        {loadingTemplates ? (
+          <>
+            <Loader />
+          </>
+        ) : (
+          <>
+            {templates && templates.length > 0 ? (
+              <>
+                {templates.map((t) => (
+                  <Card key={t.id} className="hover:shadow">
+                    <CardContent
+                      onClick={() => {
+                        setSelectedTemplate(t);
+                        setOpen(true);
+                      }}
+                      className="p-4 cursor-pointer"
+                    >
+                      <h2 className="font-semibold">{t.name}</h2>
+                      <h2 className="font-semibold">{t.subject}</h2>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {t.body}
+                      </p>
+                    </CardContent>
 
-            {/* Centered Delete button */}
-            <div className="flex justify-center pb-4">
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  setSelectedTemplate(t);
-                  setDeleteOpen(true);
-                }}
-                className="cursor-pointer"
-              >
-                Delete
-              </Button>
-            </div>
-          </Card>
-        ))}
+                    {/* Centered Delete button */}
+                    <div className="flex justify-center pb-4">
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setSelectedTemplate(t);
+                          setDeleteOpen(true);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </>
+            ) : (
+              <div className="flex justify-center items-center h-screen">
+              <p>No Templates Are Found</p>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <TemplateFormModal

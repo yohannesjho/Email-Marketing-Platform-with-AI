@@ -101,7 +101,7 @@ export default function EmailsPage() {
       <div className="grid gap-4">
         {loading ? (
           <>
-          <Loader/>
+            <Loader />
           </>
         ) : (
           <>
@@ -141,7 +141,9 @@ export default function EmailsPage() {
               </>
             ) : (
               <>
-                <p>No Emails Found</p>
+                <p className="flex justify-center items-center h-screen">
+                  No Emails Found
+                </p>
               </>
             )}
           </>
