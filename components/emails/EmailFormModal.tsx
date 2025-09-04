@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Email } from "@/types/emails";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Contact } from "@/types/contacts";
+import { Template } from "@/types/templates";
 
 const emailStatus = z.enum(["DRAFT", "SCHEDULED", "SENT", "FAILED"]);
 const EmailSchema = z.object({
@@ -44,6 +45,7 @@ export default function EmailFormModal({
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<CreateOrUpdateEmail>({
     resolver: zodResolver(EmailSchema),
@@ -56,6 +58,7 @@ export default function EmailFormModal({
     },
   });
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -82,9 +85,14 @@ export default function EmailFormModal({
   useEffect(() => {
     fetch("/api/contacts")
       .then((res) => res.json())
-      .then((data) => setContacts(data));
+      .then((data) => setContacts(data.contacts));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/templates?all=true")
+      .then((res) => res.json())
+      .then((data) => setTemplates(data.templates));
+  }, []);
   const submit = (data: CreateOrUpdateEmail) => {
     console.log(data);
     const payload = {
@@ -96,9 +104,19 @@ export default function EmailFormModal({
 
     onSave(payload);
   };
+
+  const handleTemplateSelect = (template: Template) => {
+    // Update form fields
+    reset({
+      ...getValues(), // keep other existing form values
+      subject: template.subject,
+      body: template.body,
+      templateId: template.id,
+    });
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle>{email ? "Edit Email" : "New Email"}</DialogTitle>
         </DialogHeader>
@@ -111,6 +129,7 @@ export default function EmailFormModal({
               <p className="text-red-500 text-sm">{errors.subject.message}</p>
             )}
           </div>
+
           <div>
             <Label>Body</Label>
             <Textarea placeholder="Email body" {...register("body")} />
@@ -118,6 +137,7 @@ export default function EmailFormModal({
               <p className="text-red-500 text-sm">{errors.body.message}</p>
             )}
           </div>
+
           <div>
             <Label>Scheduled At</Label>
             <Input
@@ -125,7 +145,11 @@ export default function EmailFormModal({
               placeholder="YYYY-MM-DD HH:MM"
               {...register("scheduledAt")}
             />
-            {errors.scheduledAt && <p>{errors.scheduledAt.message}</p>}
+            {errors.scheduledAt && (
+              <p className="text-red-500 text-sm">
+                {errors.scheduledAt.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -143,6 +167,7 @@ export default function EmailFormModal({
               <p className="text-red-500 text-sm">{errors.status.message}</p>
             )}
           </div>
+
           <div>
             <Label>Recipients</Label>
             <select
@@ -150,7 +175,7 @@ export default function EmailFormModal({
               {...register("recipients")}
               className="w-full p-2 border rounded"
             >
-              {contacts.map((contact) => (
+              {contacts?.map((contact) => (
                 <option key={contact.id} value={contact.id}>
                   {contact.name}
                 </option>
@@ -162,6 +187,27 @@ export default function EmailFormModal({
               </p>
             )}
           </div>
+
+          <div>
+            <Label>Template</Label>
+            <select
+              {...register("templateId")}
+              onChange={(e) => {
+                const templateId = e.target.value;
+                const selected = templates.find((t) => t.id === templateId);
+                if (selected) handleTemplateSelect(selected);
+              }}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">-- Select a Template --</option>
+              {templates?.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel

@@ -12,17 +12,29 @@ export async function GET(req: NextRequest) {
         }
 
         const { searchParams } = new URL(req.url);
+        const all = searchParams.get("all") === "true";
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '5')
 
         const skip = (page - 1) * limit;
         
-        const templates = await prisma.template.findMany({
-            where: {userId: user.id},
-            orderBy: { createdAt: 'desc'},
-            skip,
-            take: limit,
-        })
+       let templates;
+
+       if (all) {
+         
+         templates = await prisma.template.findMany({
+           where: { userId: user.id },
+           orderBy: { createdAt: "desc" },
+         });
+       } else {
+         const skip = (page - 1) * limit;
+         templates = await prisma.template.findMany({
+           where: { userId: user.id },
+           orderBy: { createdAt: "desc" },
+           skip,
+           take: limit,
+         });
+       }
 
         const totalCount = await prisma.template.count({
             where: {userId: user.id}

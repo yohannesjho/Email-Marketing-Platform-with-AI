@@ -123,6 +123,7 @@ export default function TemplatesPage() {
         </div>
       </div>
 
+      
       <div className="grid gap-4">
         {templates.map((t) => (
           <Card key={t.id} className="hover:shadow">

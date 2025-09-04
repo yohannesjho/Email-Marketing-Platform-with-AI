@@ -10,25 +10,46 @@ import EmailFormModal, {
 import { Email } from "@/types/emails";
 import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
 import Pagination from "@/components/Pagination";
+import Loader from "@/components/Loader";
+ 
+ 
 
 export default function EmailsPage() {
   const [emails, setEmails] = useState<Email[]>([]);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Load emails
   useEffect(() => {
-    fetch(`/api/email?page=${page}&limit=${limit}`)
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchEmails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/email?page=${page}&limit=${limit}`);
+
+        if (!response.ok) {
+          throw new Error("unable to fetch emails");
+        }
+
+        const data = await response.json();
+
         setEmails(data.emails);
+
         setTotalCount(data.totalCount);
-      });
-  }, [page,limit]);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmails()
+  }, [page, limit]);
 
   const handleSave = async (email: CreateOrUpdateEmail) => {
     if (selectedEmail) {
@@ -50,7 +71,7 @@ export default function EmailsPage() {
 
     // Refresh list
     const updated = await fetch("/api/email").then((res) => res.json());
-    setEmails(updated);
+    setEmails(updated.emails);
 
     setSelectedEmail(null);
     setOpen(false);
@@ -78,33 +99,53 @@ export default function EmailsPage() {
       </div>
 
       <div className="grid gap-4">
-        {emails.map((e) => (
-          <Card key={e.id} className="hover:shadow">
-            <CardContent
-              onClick={() => {
-                setSelectedEmail(e);
-                setOpen(true);
-              }}
-              className="p-4 cursor-pointer"
-            >
-              <h2 className="font-semibold">{e.subject}</h2>
-              <p className="text-sm text-gray-600 line-clamp-2">{e.body}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                Status: {e.status} | Scheduled:{" "}
-                {e.scheduledAt ? new Date(e.scheduledAt).toLocaleString() : "—"}
-              </p>
-            </CardContent>
-            <button
-              onClick={() => {
-                setSelectedEmail(e);
-                setDeleteOpen(true);
-              }}
-              className="text-red-500 hover:underline cursor-pointer px-4 py-2"
-            >
-              Delete
-            </button>
-          </Card>
-        ))}
+        {loading ? (
+          <>
+          <Loader/>
+          </>
+        ) : (
+          <>
+            {emails && emails.length > 0 ? (
+              <>
+                {emails?.map((e) => (
+                  <Card key={e.id} className="hover:shadow">
+                    <CardContent
+                      onClick={() => {
+                        setSelectedEmail(e);
+                        setOpen(true);
+                      }}
+                      className="p-4 cursor-pointer"
+                    >
+                      <h2 className="font-semibold">{e.subject}</h2>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {e.body}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Status: {e.status} | Scheduled:{" "}
+                        {e.scheduledAt
+                          ? new Date(e.scheduledAt).toLocaleString()
+                          : "—"}
+                      </p>
+                    </CardContent>
+                    <button
+                      onClick={() => {
+                        setSelectedEmail(e);
+                        setDeleteOpen(true);
+                      }}
+                      className="text-red-500 hover:underline cursor-pointer px-4 py-2"
+                    >
+                      Delete
+                    </button>
+                  </Card>
+                ))}
+              </>
+            ) : (
+              <>
+                <p>No Emails Found</p>
+              </>
+            )}
+          </>
+        )}
       </div>
 
       <EmailFormModal
