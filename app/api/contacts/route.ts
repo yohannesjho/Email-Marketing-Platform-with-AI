@@ -4,7 +4,8 @@ import { getUserFromToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
+    console.log(user);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -35,9 +36,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

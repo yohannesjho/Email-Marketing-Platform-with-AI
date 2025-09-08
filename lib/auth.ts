@@ -4,7 +4,7 @@ import {prisma} from '@/lib/prisma';
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey"; // put in .env
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 export async function hashPassword(password: string) {
   return await bcrypt.hash(password, 10);
@@ -27,12 +27,13 @@ export function verifyToken(token: string) {
 }
 
 export async function getUserFromToken(req: NextRequest) {
- const authHeader = req.headers.get("authorization");
+ const authHeader = req.headers.get("Authorization");
+ console.log(authHeader);
  if (!authHeader?.startsWith("Bearer ")) return null;
 
  const token = authHeader.split(" ")[1];
  try {
-   const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+   const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
    return decoded;
  } catch {
    return null;

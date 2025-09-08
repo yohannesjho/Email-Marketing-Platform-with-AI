@@ -8,6 +8,7 @@ import ContactFormModal from "@/components/contacts/ContactFormModal";
 import DeleteContactModal from "@/components/contacts/DeleteContactModal";
 import Pagination from "@/components/Pagination";
 import Loader from "@/components/Loader";
+import { useAuth } from "@/context/AuthContext";
 
 type Contact = {
   id: string;
@@ -17,6 +18,7 @@ type Contact = {
 };
 
 export default function ContactsPage() {
+  const { state } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
@@ -29,42 +31,62 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(false)
 
   // Load contacts
+   const fetchContacts = async () => {
+     if (!state.token) return;
+     setLoading(true);
+
+     try {
+       const res = await fetch(`/api/contacts?page=${page}&limit=${limit}`, {
+         headers: {
+           "Content-Type": "application/json",
+           Authorization: `Bearer ${state.token}`,
+         },
+       });
+
+       if (!res.ok) {
+         console.log(res.status);
+         throw new Error(`Error: ${res.status}`);
+       }
+
+       const data = await res.json();
+       setTotalCount(data.totalCount);
+       setContacts(data.contacts);
+     } catch (err) {
+       console.error("Error fetching contacts:", err);
+     } finally {
+       setLoading(false);
+     }
+   };
   useEffect(() => {
-    setLoading(true)
-    fetch(`/api/contacts?page=${page}&limit=${limit}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTotalCount(data.totalCount);
-        setContacts(data.contacts);
-      })
-      .catch((err) => {
-        console.error("Error fetching contacts:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });;
-  }, []);
+
+    fetchContacts();
+  }, [page, limit, state.token]);
+
 
   const handleSave = async (contact: any) => {
     if (selectedContact) {
       // update
       await fetch(`/api/contacts/${selectedContact.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${state.token}`,  
+          },
         body: JSON.stringify(contact),
       });
     } else {
       // create
       await fetch("/api/contacts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
         body: JSON.stringify(contact),
       });
     }
 
-    // Refresh list
-    const updated = await fetch("/api/contacts").then((res) => res.json());
-    setContacts(updated);
+    await fetchContacts();
 
     setSelectedContact(null);
     setOpen(false);
@@ -73,12 +95,14 @@ export default function ContactsPage() {
   async function deleteContact(id: string) {
     const res = await fetch(`/api/contacts/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${state.token}`,
+      },
     });
     if (!res.ok) throw new Error("Failed to delete contact");
 
     // Refresh list
-    const updated = await fetch("/api/contacts").then((res) => res.json());
-    setContacts(updated);
+   await fetchContacts();
   }
 
   return (
