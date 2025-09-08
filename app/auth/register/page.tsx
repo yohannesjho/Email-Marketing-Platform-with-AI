@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from 'next/navigation';
 
 type FormData = {
   name: string;
@@ -13,12 +14,42 @@ type FormData = {
 };
 
 export default function RegisterPage() {
-  const { registerUser, state } = useAuth();
+  const { dispatch, login, state } = useAuth();
   const { register, handleSubmit } = useForm<FormData>();
 
+  const router = useRouter();
+
   async function onSubmit(data: FormData) {
-    console.log("Registering user:", data);
-    await registerUser(data.name, data.email, data.password);
+    
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            name: data.name,
+            email: data.email,
+            password: data.password,
+          }),
+        }
+      );
+    
+      const user = await res.json();
+      if (!res.ok) {
+        throw new Error(user.error || "Register failed");
+      }
+
+      dispatch({ type: "LOGIN_SUCCESS", payload: user });
+
+      login(user)
+
+      router.push("/dashboard");
+    } catch (error) {
+      dispatch({ type: "LOGIN_FAILURE", payload: "Registration failed" });
+    }
   }
 
   return (

@@ -5,8 +5,7 @@ import { hashPassword, generateToken } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
-    console.log(name, email, password)
-
+    
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -28,16 +27,14 @@ export async function POST(req: Request) {
     const token = generateToken(user.id);
 
     const res = NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     });
-    res.cookies.set("token", token, {
-      httpOnly: true,
-      secure: true,
-      path: "/",
-    });
-
+ 
     return res;
   } catch (error) {
     console.error(error);

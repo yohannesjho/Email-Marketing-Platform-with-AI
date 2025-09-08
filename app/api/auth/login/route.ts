@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     try {
         const { email, password } = await req.json();
 
-        console.log(email, password)
+        
          if (!email || !password) {
            return NextResponse.json(
              { error: "Missing fields" },
@@ -25,13 +25,16 @@ export async function POST(req: Request) {
 
         }
 
-        const res = NextResponse.json({
-            id: user.id,
-            email: user.email,
-            name: user.name
-        });
+        const token = generateToken(user.id);
 
-        res.cookies.set("token", generateToken(user.id), {httpOnly:true, secure: true, path:"/"})
+        const res = NextResponse.json({
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        });
 
         return res;
 

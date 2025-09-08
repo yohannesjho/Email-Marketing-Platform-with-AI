@@ -1,17 +1,16 @@
 'use client'
-import { createContext, useContext, useReducer } from "react";
-import { AuthState, AuthAction, authReducer,InitialAuthState, init } from "@/reducers/authRreducer";
+import { createContext, useContext, useEffect, useReducer } from "react";
+import { AuthState, AuthAction, authReducer,InitialAuthState } from "@/reducers/authRreducer";
 import { useRouter } from 'next/navigation';
 
 type AuthContextType = {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
-  login: (email: string, password: string) => Promise<void>;
-  registerUser: (
-    name: string,
-    email: string,
-    password: string
-  ) => Promise<void>;
+  login: (user: {
+    token: string;
+    user: { id: string; email: string; name: string };
+  }) => Promise<void>;
+ 
   logout: () => void;
 };
 
@@ -20,83 +19,44 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, InitialAuthState);
 
-  const router = useRouter();
+   useEffect(() => {
+     const storedUser = localStorage.getItem("user");
+     if (storedUser) {
+       const { user, token } = JSON.parse(storedUser);
+       dispatch({ type: "LOGIN_SUCCESS", payload: { token, user } });
+     }
+     dispatch({ type: "FINISH_LOADING" });  
+   }, []);
 
-  const login = async (email: string, password: string) => {
-    dispatch({ type: "LOGIN_REQUEST" });
-    
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        throw new Error("Login failed");
-      }
-      const user = await res.json();
-      
-      dispatch({ type: "LOGIN_SUCCESS", payload: user });
 
-      localStorage.setItem('user', JSON.stringify(user));
-      router.push("/dashboard");
-    } catch (error) {
-      dispatch({ type: "LOGIN_FAILURE", payload: "Login failed" });
+  useEffect(() => {
+    if (state.user && state.token) {
+      localStorage.setItem("user", JSON.stringify({ user: state.user, token: state.token }));
+    } else {
+      localStorage.removeItem("user");
     }
+  }, [state.user, state.token]);
+
+
+
+  const login = async (user: { token: string; user: { id: string, email: string, name: string} }) => {
+
+    const { token, user: userData } = user;
+     
+    dispatch({ type: "LOGIN_SUCCESS", payload: {token, user: userData} });
   };
 
-  const registerUser = async (name: string, email: string, password: string) => {
-    dispatch({ type: "LOGIN_REQUEST" });
-
-    try {
-      
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const user = await res.json();
-
-      if (!res.ok) {
-        throw new Error(user.error || "Register failed");
-      }
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: user });
-    } catch (error) {
-      dispatch({ type: "LOGIN_FAILURE", payload: "Registration failed" });
-    }
-  };
+ 
 
 const logout = async () => {
-  try {
-    const res = await fetch("http://localhost:3000/api/auth/logout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Logout failed");
-    }
-
-    // Clear persisted user
-    localStorage.removeItem("user");  
     dispatch({ type: "LOGOUT" });
-  } catch (error) {
-    console.error(error);
-    dispatch({ type: "LOGIN_FAILURE", payload: "Logout failed" });
-  }
+    localStorage.removeItem("user");
 };
 
 
   return (
     <AuthContext.Provider
-      value={{ state, dispatch, login, registerUser, logout }}
+      value={{ state, dispatch, login, logout }}
     >
       {children}
     </AuthContext.Provider>
