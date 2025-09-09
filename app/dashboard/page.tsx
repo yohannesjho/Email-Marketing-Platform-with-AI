@@ -9,36 +9,52 @@ export default function DashboardPage() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Total Emails</CardTitle>
+          <CardTitle className="text-xs sm:text-sm md:text-base">
+            Total Emails
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{summData.emails}</p>
+          <p className="text-base sm:text-xl md:text-2xl font-bold">
+            {summData.emails}
+          </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Scheduled</CardTitle>
+          <CardTitle className="text-xs sm:text-sm md:text-base">
+            Scheduled
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{summData.scheduledEmails}</p>
+          <p className="text-base sm:text-xl md:text-2xl font-bold">
+            {summData.scheduledEmails}
+          </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Contacts</CardTitle>
+          <CardTitle className="text-xs sm:text-sm md:text-base">
+            Contacts
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{summData.contacts}</p>
+          <p className="text-base sm:text-xl md:text-2xl font-bold">
+            {summData.contacts}
+          </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Templates</CardTitle>
+          <CardTitle className="text-xs sm:text-sm md:text-base">
+            Templates
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{summData.templates}</p>
+          <p className="text-base sm:text-xl md:text-2xl font-bold">
+            {summData.templates}
+          </p>
         </CardContent>
       </Card>
     </div>
