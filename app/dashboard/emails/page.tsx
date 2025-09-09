@@ -12,10 +12,12 @@ import DeleteEmailModal from "@/components/emails/DeleteEmailModal";
 import Pagination from "@/components/Pagination";
 import Loader from "@/components/Loader";
 import SendEmailModal from "@/components/emails/SendEmailModal";
+import { useAuth } from "@/context/AuthContext";
  
  
 
 export default function EmailsPage() {
+  const { state } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
 
   const [page, setPage] = useState(1);
@@ -28,11 +30,15 @@ export default function EmailsPage() {
   const [loading, setLoading] = useState(false);
 
   // Load emails
-  useEffect(() => {
     const fetchEmails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/email?page=${page}&limit=${limit}`);
+        const response = await fetch(`/api/email?page=${page}&limit=${limit}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error("unable to fetch emails");
@@ -50,7 +56,8 @@ export default function EmailsPage() {
       }
     };
 
-    fetchEmails()
+    useEffect(() => {
+    fetchEmails();
   }, [page, limit]);
 
   const handleSave = async (email: CreateOrUpdateEmail) => {
@@ -59,38 +66,53 @@ export default function EmailsPage() {
       // update
       await fetch(`/api/email/${selectedEmail.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+         },
         body: JSON.stringify(email),
       });
     } else {
+      console.log(email);
       // create
       await fetch(`/api/email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
         body: JSON.stringify(email),
       });
     }
 
     // Refresh list
-    const updated = await fetch("/api/email").then((res) => res.json());
-    setEmails(updated.emails);
+   await fetchEmails();
 
     setSelectedEmail(null);
     setOpen(false);
   };
 
   async function deleteEmail(id: string | undefined) {
-    const res = await fetch(`/api/email/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/email/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${state.token}`,
+      },
+    });
     if (!res.ok) throw new Error("Failed to delete email");
-    const updated = await fetch("/api/email").then((res) => res.json());
-    setEmails(updated);
+    await fetchEmails();
+    setDeleteOpen(false);
   }
 
   const handleEmailSend = async (emails: string[]) => {
     try {
       const res = await fetch("/api/email/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
         body: JSON.stringify({
           recipients: emails,
           subject: selectedEmail?.subject,

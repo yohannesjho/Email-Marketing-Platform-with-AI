@@ -1,10 +1,10 @@
 import { getUserFromToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request, { params } : { params: { id: string}}) {
+export async function GET(req: NextRequest, { params } : { params: { id: string}}) {
     try {
-        const user = await getUserFromToken();
+        const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
@@ -25,9 +25,11 @@ export async function GET(req: Request, { params } : { params: { id: string}}) {
     }
 }
 
-export async function PUT(req: Request, { params } : { params: { id: string}}) {
+export async function PUT(req: NextRequest, { params } : { params: { id: string}}) {
     try {
-        const user = await getUserFromToken();
+        const { id } = params;
+
+        const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
@@ -42,7 +44,7 @@ export async function PUT(req: Request, { params } : { params: { id: string}}) {
         }
 
         const template = await prisma.template.update({
-            where: { id: params.id, userId: user.id },
+            where: { id, userId: user.id },
             data: {
                 name,
                 subject,
@@ -57,9 +59,9 @@ export async function PUT(req: Request, { params } : { params: { id: string}}) {
     }
 }
 
-export async function DELETE(req: Request, { params } : { params: { id: string}}) {
+export async function DELETE(req: NextRequest, { params } : { params: { id: string}}) {
     try {
-        const user = await getUserFromToken();
+        const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})

@@ -17,6 +17,7 @@ import { Email } from "@/types/emails";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Contact } from "@/types/contacts";
 import { Template } from "@/types/templates";
+import { useAuth } from "@/context/AuthContext";
 
 const emailStatus = z.enum(["DRAFT", "SCHEDULED", "SENT", "FAILED"]);
 const EmailSchema = z.object({
@@ -41,6 +42,7 @@ export default function EmailFormModal({
   onSave: (email: CreateOrUpdateEmail) => Promise<void>;
   email: Email | null;
 }) {
+  const { state } = useAuth();
   const {
     register,
     handleSubmit,
@@ -83,13 +85,13 @@ export default function EmailFormModal({
   }, [email, open, reset]);
 
   useEffect(() => {
-    fetch("/api/contacts")
+    fetch("/api/contacts", { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.token}` } })
       .then((res) => res.json())
       .then((data) => setContacts(data.contacts));
   }, []);
 
   useEffect(() => {
-    fetch("/api/templates?all=true")
+    fetch("/api/templates?all=true", { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.token}` } })
       .then((res) => res.json())
       .then((data) => setTemplates(data.templates));
   }, []);
@@ -202,7 +204,7 @@ export default function EmailFormModal({
               <option value="">-- Select a Template --</option>
               {templates?.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name}
+                  {t.subject}
                 </option>
               ))}
             </select>

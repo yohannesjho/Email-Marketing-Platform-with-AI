@@ -12,8 +12,10 @@ import DeleteTemplateModal from "@/components/templates/DeleteTemplateModal";
 import GenerateFormModal from "@/components/templates/GenerateFormModal";
 import Pagination from "@/components/Pagination";
 import Loader from "@/components/Loader";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TemplatesPage() {
+  const { state } = useAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
@@ -33,21 +35,32 @@ export default function TemplatesPage() {
   const [updating, setUpdating] = useState(false);
 
   // Load templates
-  useEffect(() => {
-    setLoadingTemplates(true);
+  const fetchTemplates = async () => {
+    if (!state.token) return; // don't fetch if no token
 
-    fetch(`/api/templates?limit=${limit}&page=${page}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTemplates(data.templates);
-        setTotalCount(data.totalCount);
-      })
-      .catch((err) => {
-        console.error("Error fetching templates:", err);
-      })
-      .finally(() => {
-        setLoadingTemplates(false);
+    setLoadingTemplates(true);
+    try {
+      const res = await fetch(`/api/templates?limit=${limit}&page=${page}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
       });
+
+      if (!res.ok) throw new Error(`Error: ${res.status}`);
+      const data = await res.json();
+      setTemplates(data.templates);
+      setTotalCount(data.totalCount);
+    } catch (err) {
+      console.error("Error fetching templates:", err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  useEffect(() => {
+     fetchTemplates();
   }, [page, limit]);
 
   const handleSave = async (template: CreateOrUpdateTemplate) => {
@@ -55,9 +68,9 @@ export default function TemplatesPage() {
       setUpdating(true);
       console.log(template);
       // update
-      fetch(`/api/templates/${selectedTemplate.id}`, {
+      await fetch(`/api/templates/${selectedTemplate.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${state.token}` },
         body: JSON.stringify(template),
       })
         .catch((err) => console.log(err))
@@ -67,9 +80,9 @@ export default function TemplatesPage() {
     } else {
       // create
       setUpdating(true)
-        fetch("/api/templates", {
+       await fetch("/api/templates", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${state.token}` },
           body: JSON.stringify(template),
         })
           .catch((err) => console.log(err))
@@ -79,8 +92,7 @@ export default function TemplatesPage() {
     }
 
     // Refresh list
-    const updated = await fetch("/api/templates").then((res) => res.json());
-    setTemplates(updated.templates);
+    await fetchTemplates();
     setSelectedTemplate(null);
     setOpen(false);
   };
@@ -92,6 +104,7 @@ export default function TemplatesPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
         },
         body: JSON.stringify({ prompt: p }),
       });
@@ -100,8 +113,7 @@ export default function TemplatesPage() {
         throw new Error("Failed to generate template");
       }
 
-      const updated = await fetch("/api/templates").then((res) => res.json());
-      setTemplates(updated.templates);
+    await fetchTemplates();
       setLoading(false);
       setGenerateError(null);
       setGenerateSuccess("Template generated successfully!");
@@ -112,11 +124,13 @@ export default function TemplatesPage() {
   };
 
   async function deleteEmail(id: string | undefined) {
-    const res = await fetch(`/api/templates/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/templates/${id}`, { method: "DELETE" , headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${state.token}`,
+    }});
     if (!res.ok) throw new Error("Failed to delete email");
     setDeleteOpen(false);
-    const updated = await fetch("/api/templates").then((res) => res.json());
-    setTemplates(updated.templates);
+    await fetchTemplates();
   }
 
   return (

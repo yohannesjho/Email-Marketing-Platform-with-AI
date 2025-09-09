@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { generateTemplate } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
 import { getUserFromToken } from "@/lib/auth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { prompt } = await req.json();
     if (!prompt) {
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
    
-    const user = await getUserFromToken()
+    const user = await getUserFromToken(req)
 
     if(!user) {
       return NextResponse.json({message: "Unautorized"}, {status: 401})

@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
  
 import { Contact } from '@/types/contacts';
 import { Button } from '../ui/button';
+import { useAuth } from '@/context/AuthContext';
  
 
 const SendEmailModal = ({
@@ -14,10 +15,11 @@ const SendEmailModal = ({
   onOpenChange: (o: boolean) => void;
   onSend: (emails: string[]) => void;
 }) => {
+  const { state } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   useEffect(() => {
-    fetch("/api/contacts")
+    fetch("/api/contacts", { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${state.token}` } })
       .then((res) => res.json())
       .then((data) => setContacts(data.contacts));
   }, []);
@@ -33,7 +35,7 @@ const SendEmailModal = ({
       return;
     }
     onSend(selectedEmails);
-    onOpenChange(false); // close modal
+    onOpenChange(false);  
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -1,11 +1,11 @@
 // app/api/emails/send/route.ts
-import { NextResponse } from "next/server";
-import nodemailer from "nodemailer"; // or resend/sendgrid SDK
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer"; 
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const { recipients, subject, body } = await req.json();
 
-  // example: nodemailer
+ 
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {

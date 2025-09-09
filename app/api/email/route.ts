@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserFromToken } from "@/lib/auth";
 export async function GET(req: NextRequest) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "user is not found" }, { status: 401 });
 
@@ -36,9 +36,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
 
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
         subject,
         body: emailBody,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-        templateId,
+        templateId: templateId || null,
         status: status,
         userId: user.id,
         recipients:

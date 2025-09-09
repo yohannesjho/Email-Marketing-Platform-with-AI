@@ -1,13 +1,13 @@
 import { getUserFromToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -36,10 +36,10 @@ export async function GET(
   }
 }
 
-export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -54,15 +54,16 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       scheduledAt,
       status,
     } = await req.json();
+    console.log(subject);
 
-    console.log(recipients)
-     
+    console.log(recipients);
+
     const email = await prisma.email.update({
       where: { id, userId: user.id },
       data: {
         subject,
         body: emailBody,
-        templateId,
+        templateId: templateId || null,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         status,
         recipients:
@@ -83,11 +84,11 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 }
 
 export async function DELETE(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await getUserFromToken();
+    const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
