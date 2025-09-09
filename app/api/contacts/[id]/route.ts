@@ -4,10 +4,10 @@ import { getUserFromToken } from "@/lib/auth";
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string }}
+  { params }: any
 ) {
   try {
-    const { id } = context.params;
+    const { id } = params;
     const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
