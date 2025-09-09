@@ -1,2 +1,2 @@
 // eslintConfig.js
-export default [];
+export default [{}];

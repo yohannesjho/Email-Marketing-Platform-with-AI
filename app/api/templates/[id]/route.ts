@@ -2,7 +2,7 @@ import { getUserFromToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, context : { params: { id: string}}) {
+export async function GET(req: NextRequest,   { params}: any) {
     try {
         const user = await getUserFromToken(req);
 
@@ -10,10 +10,10 @@ export async function GET(req: NextRequest, context : { params: { id: string}}) 
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
 
-        const { params } = context;
+        const { id } = params;
 
         const template = await prisma.template.findFirst({
-            where: {id: params.id, userId: user.id},
+            where: {id, userId: user.id},
             include: {
                 emails: true
             }
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, context : { params: { id: string}}) 
     }
 }
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+export async function PUT(req: NextRequest,  { params }: any) {
     try {
        
 
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
 
-         const { id } = context.params;
+         const { id } = params;
 
         const body = await req.json();
 
@@ -63,7 +63,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
     }
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest,  { params }: any) {
     try {
         const user = await getUserFromToken(req);
 
@@ -71,10 +71,10 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
 
-        const { params } = context;
+        const { id } = params;
 
         const template = await prisma.template.delete({
-            where: { id: params.id, userId: user.id }
+            where: { id, userId: user.id }
         })
 
         return NextResponse.json(template)

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: any
 ) {
   try {
 
@@ -12,12 +12,12 @@ export async function GET(
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = context.params;
+    const id = params.id;
 
     const email = await prisma.email.findFirst({
       where: {
         id,
-        userId: user.id, // secure — only fetch user’s own email
+        userId: user.id,  
       },
       include: {
         template: true,
@@ -39,9 +39,9 @@ export async function GET(
   }
 }
 
-export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: any) {
   try {
-    const { id } = await context.params;
+    const { id } = params;
     const user = await getUserFromToken(req);
 
     if (!user) {
@@ -88,14 +88,14 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { id } = context.params;
+    const { id } = params;
 
     await prisma.email.delete({
       where: {
