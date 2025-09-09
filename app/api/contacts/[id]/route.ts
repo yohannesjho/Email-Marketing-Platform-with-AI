@@ -4,10 +4,10 @@ import { getUserFromToken } from "@/lib/auth";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string }}
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -38,7 +38,7 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params; // ✅ await params
+    const { id } = await context.params;  
 
     const user = await getUserFromToken(req);
     if (!user)
