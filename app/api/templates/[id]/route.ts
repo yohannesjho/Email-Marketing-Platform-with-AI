@@ -2,13 +2,15 @@ import { getUserFromToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params } : { params: { id: string}}) {
+export async function GET(req: NextRequest, context : { params: { id: string}}) {
     try {
         const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
+
+        const { params } = context;
 
         const template = await prisma.template.findFirst({
             where: {id: params.id, userId: user.id},
@@ -25,15 +27,17 @@ export async function GET(req: NextRequest, { params } : { params: { id: string}
     }
 }
 
-export async function PUT(req: NextRequest, { params } : { params: { id: string}}) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
     try {
-        const { id } = params;
+       
 
         const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
+
+         const { id } = context.params;
 
         const body = await req.json();
 
@@ -59,13 +63,15 @@ export async function PUT(req: NextRequest, { params } : { params: { id: string}
     }
 }
 
-export async function DELETE(req: NextRequest, { params } : { params: { id: string}}) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
     try {
         const user = await getUserFromToken(req);
 
         if(!user) {
             return NextResponse.json({message: "Unauthorized"}, { status: 401})
         }
+
+        const { params } = context;
 
         const template = await prisma.template.delete({
             where: { id: params.id, userId: user.id }
