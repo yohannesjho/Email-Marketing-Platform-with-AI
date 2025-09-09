@@ -7,6 +7,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = params;
     const user = await getUserFromToken(req);
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,7 +15,7 @@ export async function PUT(
   const { name, email, tags } = await req.json();
 
   const contact = await prisma.contact.update({
-    where: { id: params.id, userId: user.id },
+    where: { id: id, userId: user.id },
     data: {
       name,
       email,
