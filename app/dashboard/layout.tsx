@@ -16,8 +16,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Sidebar */}
         <aside
           className={`bg-gray-900 min-h-screen text-white flex flex-col p-4
-          fixed md:static top-0 left-0 h-full 
-          w-36 sm:w-52 md:w-64   /* 👈 smaller on xs/sm, full on md+ */
+          fixed md:static top-0 left-0 h-auto
+          w-36 sm:w-52 md:w-64    /* 👈 smaller on xs/sm, full on md+ */
           transform transition-transform
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0 z-50`}

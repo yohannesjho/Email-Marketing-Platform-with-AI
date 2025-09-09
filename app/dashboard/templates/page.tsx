@@ -36,8 +36,7 @@ export default function TemplatesPage() {
 
   // Load templates
   const fetchTemplates = async () => {
-    if (!state.token) return; // don't fetch if no token
-
+    if (!state.token) return;  
     setLoadingTemplates(true);
     try {
       const res = await fetch(`/api/templates?limit=${limit}&page=${page}`, {
@@ -135,77 +134,74 @@ export default function TemplatesPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Templates</h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+        {/* Heading */}
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center sm:text-left">
+          Templates
+        </h1>
+
+        {/* Actions */}
+        <div className="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
           <Button
             onClick={() => {
               setSelectedTemplate(null);
               setOpen(true);
             }}
-            className="cursor-pointer"
+            className="text-xs sm:text-sm md:text-base px-2 sm:px-4"
           >
-            <Plus className="mr-2 h-4 w-4" /> Create Manually
+            <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Create
+            Manually
           </Button>
           <Button
             onClick={() => {
               setSelectedTemplate(null);
               setGenerateOpen(true);
             }}
-            className="cursor-pointer"
+            className="text-xs sm:text-sm md:text-base px-2 sm:px-4"
           >
-            <Plus className="mr-2 h-4 w-4" /> Generate With AI
+            <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Generate
+            With AI
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4">
+      {/* Template Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {loadingTemplates ? (
-          <>
-            <Loader />
-          </>
-        ) : (
-          <>
-            {templates && templates.length > 0 ? (
-              <>
-                {templates.map((t) => (
-                  <Card key={t.id} className="hover:shadow">
-                    <CardContent
-                      onClick={() => {
-                        setSelectedTemplate(t);
-                        setOpen(true);
-                      }}
-                      className="p-4 cursor-pointer"
-                    >
-                      <h2 className="font-semibold">{t.name}</h2>
-                      <h2 className="font-semibold">{t.subject}</h2>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {t.body}
-                      </p>
-                    </CardContent>
+          <Loader />
+        ) : templates && templates.length > 0 ? (
+          templates.map((t) => (
+            <Card key={t.id} className="hover:shadow">
+              <CardContent
+                onClick={() => {
+                  setSelectedTemplate(t);
+                  setOpen(true);
+                }}
+                className="p-4 cursor-pointer"
+              >
+                <h2 className="font-semibold">{t.name}</h2>
+                <h2 className="font-semibold">{t.subject}</h2>
+                <p className="text-sm text-gray-600 line-clamp-2">{t.body}</p>
+              </CardContent>
 
-                    {/* Centered Delete button */}
-                    <div className="flex justify-center pb-4">
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          setSelectedTemplate(t);
-                          setDeleteOpen(true);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </>
-            ) : (
-              <div className="flex justify-center items-center h-screen">
-                <p>No Templates Are Found</p>
+              <div className="flex justify-center pb-4">
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setSelectedTemplate(t);
+                    setDeleteOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  Delete
+                </Button>
               </div>
-            )}
-          </>
+            </Card>
+          ))
+        ) : (
+          <div className="flex justify-center items-center col-span-full py-10">
+            <p>No Templates Found</p>
+          </div>
         )}
       </div>
 

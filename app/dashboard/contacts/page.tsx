@@ -107,71 +107,75 @@ export default function ContactsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Contacts</h1>
-        <Button onClick={() => setOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Contact
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold">Contacts</h1>
+        <Button
+          onClick={() => setOpen(true)}
+          className="text-xs sm:text-sm md:text-base px-2"
+        >
+          <Plus className="md:mr-2 md:h-4 md:w-4" /> Add Contact
         </Button>
       </div>
 
       <div className="grid gap-4">
         {loading ? (
-          <>
-            <Loader />
-          </>
-        ) : (
-          <>
-            {contacts && contacts.length > 0 ? (
-              <>
-                {contacts.map((c) => (
-                  <Card key={c.id} className="hover:shadow">
-                    <CardContent
-                      onClick={() => {
-                        setSelectedContact(c);
-                        setOpen(true);
-                      }}
-                      className="p-4 cursor-pointer"
+          <Loader />
+        ) : contacts && contacts.length > 0 ? (
+          contacts.map((c) => (
+            <Card
+              key={c.id}
+              className="hover:shadow transition-shadow duration-200"
+            >
+              <CardContent
+                onClick={() => {
+                  setSelectedContact(c);
+                  setOpen(true);
+                }}
+                className="p-4 cursor-pointer"
+              >
+                <h2 className="font-semibold text-sm sm:text-base md:text-lg">
+                  {c.name}
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600">{c.email}</p>
+
+                <div className="flex flex-wrap gap-2 mt-2 mb-2">
+                  {c.tags?.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-1 bg-gray-200 rounded-full text-[10px] sm:text-xs"
                     >
-                      <h2 className="font-semibold">{c.name}</h2>
-                      <p className="text-sm text-gray-600">{c.email}</p>
-                      <div className="flex flex-wrap gap-2 mt-2 mb-2">
-                        {c.tags?.map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-1 bg-gray-200 rounded-full text-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </CardContent>
-                    <button
-                      onClick={() => {
-                        setContactToDelete(c);
-                        setDeleteOpen(true);
-                      }}
-                      className="text-red-500 hover:underline cursor-pointer px-4 pb-2 text-sm"
-                    >
-                      Delete
-                    </button>
-                  </Card>
-                ))}
-              </>
-            ) : (
-              <div className="flex justify-center items-center h-screen">
-                <p>No Contacts Are Found</p>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+
+              <div className="flex justify-center pb-3">
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setContactToDelete(c);
+                    setDeleteOpen(true);
+                  }}
+                  className="text-xs sm:text-sm md:text-base cursor-pointer"
+                >
+                  Delete
+                </Button>
               </div>
-            )}
-          </>
+            </Card>
+          ))
+        ) : (
+          <div className="flex justify-center items-center h-40">
+            <p className="text-sm sm:text-base">No Contacts Are Found</p>
+          </div>
         )}
       </div>
 
       <ContactFormModal
         open={open}
-        onOpenChange={(o)=> {
+        onOpenChange={(o) => {
           if (!o) setSelectedContact(null);
-          setOpen(o)
-         
+          setOpen(o);
         }}
         onSave={handleSave}
         contact={selectedContact}

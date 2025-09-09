@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
  
 import { Contact } from '@/types/contacts';
 import { Button } from '../ui/button';
